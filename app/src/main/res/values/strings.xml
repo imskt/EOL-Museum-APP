@@ -1,7 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">狠活博物馆</string>
-    <string name="settings">Settings</string>
-    
-    <string name="exit_toast">Press again to exit the program.</string>
 </resources>

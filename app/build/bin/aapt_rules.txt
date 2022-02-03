@@ -1,4 +1,4 @@
-# view AndroidManifest.xml #generated:115
+# view AndroidManifest.xml #generated:116
 -keep class android.content.FileProvider { <init>(...); }
 
 # view res/layout/abc_alert_dialog_button_bar_material.xml #generated:43
@@ -66,7 +66,6 @@
 -keep class androidx.appcompat.widget.SearchView$SearchAutoComplete { <init>(...); }
 
 # view res/layout/abc_screen_toolbar.xml #generated:36
-# view res/layout/layout_jesse205_autotoolbarlayout.xml #generated:10
 # view v26/res/layout-v26/abc_screen_toolbar.xml #generated:37
 -keep class androidx.appcompat.widget.Toolbar { <init>(...); }
 
@@ -80,31 +79,20 @@
 # view res/layout/abc_alert_dialog_material.xml #generated:41
 -keep class androidx.core.widget.NestedScrollView { <init>(...); }
 
-# view AndroidManifest.xml #generated:41
+# view AndroidManifest.xml #generated:42
 -keep class com.androlua.LuaActivity { <init>(...); }
 
-# view AndroidManifest.xml #generated:71
+# view AndroidManifest.xml #generated:72
 -keep class com.androlua.LuaActivityX { <init>(...); }
 
-# view AndroidManifest.xml #generated:17
+# view AndroidManifest.xml #generated:18
 -keep class com.androlua.LuaApplication { <init>(...); }
 
-# view AndroidManifest.xml #generated:35
+# view AndroidManifest.xml #generated:36
 -keep class com.androlua.Main { <init>(...); }
 
-# view AndroidManifest.xml #generated:103
+# view AndroidManifest.xml #generated:104
 -keep class com.androlua.Welcome { <init>(...); }
-
-# view res/layout/layout_jesse205_autotoolbarlayout.xml #generated:2
--keep class com.google.android.material.appbar.AppBarLayout { <init>(...); }
-
-# view res/layout/layout_jesse205_materialbutton_outlinedbutton.xml #generated:2
-# view res/layout/layout_jesse205_materialbutton_textbutton.xml #generated:2
-# view res/layout/layout_jesse205_materialbutton_textbutton_icon.xml #generated:2
-# view res/layout/layout_materialbutton_outlinedbutton_Jesse205.xml #generated:2
-# view res/layout/layout_materialbutton_textbutton_Jesse205.xml #generated:2
-# view res/layout/layout_materialbutton_textbutton_icon_Jesse205.xml #generated:2
--keep class com.google.android.material.button.MaterialButton { <init>(...); }
 
 # view res/layout/design_bottom_navigation_item.xml #generated:27
 -keep class com.google.android.material.internal.BaselineLayout { <init>(...); }

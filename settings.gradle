@@ -1,2 +1,2 @@
-include ':app',':androlua',':Jesse205Library'
+include ':app',':androlua'
 rootProject.name = "狠活博物馆"

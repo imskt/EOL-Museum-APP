@@ -1,29 +1,19 @@
 {
-  CoordinatorLayout;
-  layout_height="fill";
-  layout_width="fill";
-  id="mainLay";
+  LinearLayout;
+  orientation="vertical";
+  layout_height="-1";
+  layout_width="-1";
+  id="page_home";
   {
-    RecyclerView;
-    layout_height="fill";
-    layout_width="fill";
-    id="recyclerView";
-    paddingLeft="8dp";
-    paddingRight="8dp";
-    clipToPadding=false;
+    SwipeRefreshLayout;
+    id="swipe1";
+    {
+      ListView;
+      layout_height="-1";
+      layout_width="-1";
+      DividerHeight=0;
+      fastScrollEnabled=false;
+      id="homelist";
+    };
   };
-{
-LinearLayout;
-gravity="center";
-orientation="vertical";
-layout_width="fill";
-layout_height="fill";
-id="pb";
-{
-ProgressBar;
-layout_height="150dp";
-layout_width="150dp";
 };
-};
-
-}

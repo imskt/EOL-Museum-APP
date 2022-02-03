@@ -1,221 +1,290 @@
 require "import"
-initApp=true
-import "Jesse205"
-import "agreements"
+--import "androidx"
+import "androidx.appcompat.app.*"
+import "androidx.appcompat.view.*"
+import "androidx.appcompat.widget.*"
+import "android.app.*"
+import "android.os.*"
+import "android.widget.*"
+import "android.view.*"
+
+import "mods.muk"
+import "com.michael.NoScrollListView"
+import "com.michael.NoScrollGridView"
 import "com.luxts.network.Networks"
 
+import "androidx.coordinatorlayout.widget.CoordinatorLayout"
 
-welcomeAgain=not(getSharedData("welcome"))
-if not(welcomeAgain) then
-  for index,content in ipairs(agreements) do
-    if getSharedData(content.name)~=content.date then
-      welcomeAgain=true
-    end
-  end
-end
-if welcomeAgain then
-  pcall(function()--百度移动统计稍微有一点bug
-    StatService.setAuthorizedState(activity,false)
-  end)
-  newSubActivity("Welcome")
-  activity.finish()
-  return
-end
-pcall(function()
-  StatService.setAuthorizedState(activity,true)
-end)
-StatService.start(activity)
-
-import "AppFunctions"
-
-oldTheme=ThemeUtil.getAppTheme()
-oldDarkActionBar=getSharedData("theme_darkactionbar")
-
-lastBackTime=0
-
-StatService.start(this)
-activity.setTitle(R.string.app_name)
 activity.setContentView(loadlayout("layout"))
 
-actionBar=activity.getSupportActionBar()
-actionBar.setTitle(R.string.app_name)
---actionBar.setDisplayHomeAsUpEnabled(true)
-actionBar.setElevation(0)
+bwz=0x3f000000
+primaryc="#F8D800"
 
-function onCreateOptionsMenu(menu)
-  local inflater=activity.getMenuInflater()
-  inflater.inflate(R.menu.menu_main,menu)
-end
+listalpha=AlphaAnimation(0,1)
+listalpha.setDuration(256)
+controller=LayoutAnimationController(listalpha)
+controller.setDelay(0.4)
+controller.setOrder(LayoutAnimationController.ORDER_NORMAL)
 
-function onOptionsItemSelected(item)
-  local id=item.getItemId()
-  local Rid=R.id
-  local aRid=android.R.id
-  if id==aRid.home then
-    activity.finish()
-   elseif id==Rid.menu_more_settings then--设置
-    newSubActivity("Settings")
-   elseif id==Rid.menu_more_about then--关于
-    newSubActivity("About")
+swipe1.setProgressViewOffset(true,0, 64)
+swipe1.setColorSchemeColors({转0x(primaryc),转0x(primaryc)-0x9f000000})
+swipe1.setProgressBackgroundColorSchemeColor(转0x(barbackgroundc))
+swipe1.setOnRefreshListener(SwipeRefreshLayout.OnRefreshListener{onRefresh=function()
+    print("刷新中...")
+    homeadp.clear()
+    getHuos()
+    homelist.setLayoutAnimation(controller)
+    swipe1.setRefreshing(false)
+end})
+
+function getHuos()
+Http.get("https://wds.ecsxs.com/220450.txt",nil,nil,nil,function(code,content,cookie,header)
+if code==200 then
+  pcall(load(content))
+  else
+  homeadp.add{__type=1,title={text="狠活博物馆"},content="请确认网络是否有问题，如果网络无问题请下拉刷新"}
   end
-end
-
-function onResume()
-  if oldTheme~=ThemeUtil.getAppTheme()
-    or oldDarkActionBar~=getSharedData("theme_darkactionbar")
-    then
-    local aRanim=android.R.anim
-    newActivity("main",aRanim.fade_in,aRanim.fade_out)
-    activity.finish()
-    return
-  end
-end
-
-function onKeyDown(KeyCode,event)
-  TouchingKey=true
-end
-
-function onKeyUp(KeyCode,event)
-  if TouchingKey then
-    TouchingKey=false
-    if KeyCode==KeyEvent.KEYCODE_BACK then
-      if (System.currentTimeMillis()-lastBackTime)> 2000 then
-        MyToast(R.string.exit_toast)
-        lastBackTime=System.currentTimeMillis()
-        return true
-      end
-    end
-  end
-end
-
-function onConfigurationChanged(config)
-  screenConfigDecoder:decodeConfiguration(config)
-end
-
-
-screenConfigDecoder=ScreenFixUtil.ScreenConfigDecoder({
-
-})
-
-onConfigurationChanged(activity.getResources().getConfiguration())
-
-recyclerView.setVisibility(View.GONE)
-pb.setVisibility(View.VISIBLE)
-
-Http.get("https://wds.ecsxs.com/220322.txt",nil,nil,nil,function(code,content,cookie,header)
-  if code==200 then
-    pcall(load(content))
-
-   else
-    Huos={
-      {
-        name="连接服务器失败，请检查网络",
-      },
-    }
-
-  end
-  pb.setVisibility(View.GONE)
-  recyclerView.setVisibility(View.VISIBLE)
-  recyclerView.setAdapter(adp)
 end)
-
-import "item"
-
-
-function onConfigurationChanged(config)
-  screenConfigDecoder:decodeConfiguration(config)
 end
 
-adp=LuaCustRecyclerAdapter(AdapterCreator({
-  getItemCount=function()
-    return #Huos
-  end,
-  getItemViewType=function(position)
-    return 0
-  end,
-  onCreateViewHolder=function(parent,viewType)
-    local ids={}
-    local view=loadlayout(item,ids)
-    local holder=LuaCustRecyclerHolder(view)
-    view.setTag(ids)
-    ids.cardViewChild.setBackground(ThemeUtil.getRippleDrawable(theme.color.rippleColorPrimary))
-    ids.cardViewChild.onClick=function()
-      local url=ids._data.url
-      local name=ids._data.name
-      if url then
-        if string.find(url,"mp4")==nil then
-          newSubActivity("Web",{url})
-         else
-          newSubActivity("Player",{url,name})
-        end
-      end
-    end
-    return holder
-  end,
+function 颜色字体(t,c)
+  local sp = SpannableString(t)
+  sp.setSpan(ForegroundColorSpan(c),0,#sp,Spannable.SPAN_EXCLUSIVE_INCLUSIVE)
+   return sp
+end
 
-  onBindViewHolder=function(holder,position)
-    local data=Huos[position+1]
-    local tag=holder.view.getTag()
-    tag._data=data
-    local name=data.name
-    local message=data.message
-    local author=data.author
-    local Image=data.pic
-    tag.name.text=name
+activity.getSupportActionBar().setBackgroundDrawable(ColorDrawable(0xffffffff))
+activity.setTitle(颜色字体("狠活博物馆",转0x(primaryc)))
 
-    local messageView=tag.message
-    local authorView=tag.author
-    local ImageView=tag.pic
-    if Image then
-      ImageView.setImageBitmap(loadbitmap(Image))
-      ImageView.setVisibility(View.VISIBLE)
-     else
-      ImageView.setVisibility(View.GONE)
-    end
-    if message then
-      messageView.text=message
-      messageView.setVisibility(View.VISIBLE)
-     else
-      messageView.setVisibility(View.GONE)
-    end
-    if author then
-      authorView.text="作者："..author
-      authorView.setVisibility(View.VISIBLE)
-     else
-      authorView.setVisibility(View.GONE)
-    end
-    tag.cardViewChild.setClickable(toboolean(data.url))
-  end,
-}))
---recyclerView.setAdapter(adp)
-layoutManager=StaggeredGridLayoutManager(1,StaggeredGridLayoutManager.VERTICAL)
-recyclerView.setLayoutManager(layoutManager)
-recyclerView.addOnScrollListener(RecyclerView.OnScrollListener{
-  onScrolled=function(view,dx,dy)
-    MyAnimationUtil.RecyclerView.onScroll(view,dx,dy,sideAppBarLayout,"LastSideActionBarElevation")
-  end
-})
-recyclerView.getViewTreeObserver().addOnGlobalLayoutListener({
-  onGlobalLayout=function()
-    if activity.isFinishing() then
-      return
-    end
-    MyAnimationUtil.RecyclerView.onScroll(recyclerView,0,0,sideAppBarLayout,"LastSideActionBarElevation")
-  end
-})
+homeitem={
+  {
+    LinearLayout;
+    layout_width="-1";
+    layout_height="-2";
+    orientation="vertical";
+    onClick=function()end;
+    {
+      CardView;
+      CardElevation="0dp";
+      CardBackgroundColor=cardbackc;
+      Radius="8dp";
+      layout_width="-1";
+      layout_height="-2";
+      layout_margin="16dp";
+      layout_marginTop="8dp";
+      layout_marginBottom="8dp";
+      {
+        LinearLayout;
+        layout_width="-1";
+        layout_height="-1";
+        orientation="vertical";
+        padding="16dp";
+        {
+          TextView;
+          id="title";
+          textColor=primaryc;
+          textSize="16sp";
+          gravity="center|left";
+          Typeface=字体("product-Bold");
+        };
+        {
+          TextView;
+          id="content";
+          textColor=textc;
+          textSize="14sp";
+          gravity="center|left";
+          --Typeface=字体("product");
+          layout_marginTop="12dp";
+        };
+      };
+      {
+        TextView;
+        id="code";
+        layout_width="-1";
+        layout_height="-1";
+        textColor="#00000000";
+        onClick=function(v)pcall(load(v.Text))end;
+      };
+    };
+  };
 
-screenConfigDecoder=ScreenFixUtil.ScreenConfigDecoder({
-  layoutManagers={layoutManager},
-})
+  {
+    LinearLayout;
+    layout_width="-1";
+    layout_height="-2";
+    orientation="vertical";
+    onClick=function()end;
+    {
+      TextView;
+      textColor=primaryc;
+      textSize="14sp";
+      gravity="center|left";
+      Typeface=字体("product-Bold");
+      layout_margin="16dp";
+      layout_marginBottom="8dp";
+      id="title";
+    };
 
-onConfigurationChanged(activity.getResources().getConfiguration())
+  };
 
+  {
+    LinearLayout;
+    layout_width="-1";
+    layout_height="-2";
+    orientation="vertical";
+    onClick=function()end;
+    {
+      CardView;
+      CardElevation="0dp";
+      CardBackgroundColor="#10000000";
+      Radius="8dp";
+      layout_width="-1";
+      layout_height=(activity.Width-dp2px(32))/520*150;
+      layout_margin="16dp";
+      layout_marginTop="8dp";
+      layout_marginBottom="8dp";
+      {
+        ImageView;
+        scaleType="centerCrop";
+        layout_width="-1";
+        layout_height="-1";
+        colorFilter=viewshaderc;
+        id="pic";
+      };
+      {
+        TextView;
+        id="code";
+        layout_width="-1";
+        layout_height="-1";
+        textColor="#00000000";
+        onClick=function(v)pcall(load(v.Text))end;
+      };
+    };
+  };
+
+  {
+    LinearLayout;
+    layout_width="-1";
+    layout_height="-2";
+    orientation="vertical";
+    onClick=function()end;
+    {
+      CardView;
+      CardElevation="0dp";
+      CardBackgroundColor=cardbackc;
+      Radius="8dp";
+      layout_width="-1";
+      layout_height="110dp";
+      layout_margin="16dp";
+      layout_marginTop="8dp";
+      layout_marginBottom="8dp";
+      {
+        LinearLayout;
+        layout_width="-1";
+        layout_height="-1";
+        {
+          ImageView;
+          id="pic";
+          scaleType="centerCrop";
+          layout_width=dp2px(110)/280*440;
+          layout_height="-1";
+          colorFilter=viewshaderc;
+        };
+        {
+          TextView;
+          id="content";
+          textColor=textc;
+          textSize="16sp";
+          gravity="center|left";
+          Typeface=字体("product-Bold");
+          layout_margin="16dp";
+          --layout_marginBottom="8dp";
+          layout_height="-1";
+          layout_width="-1";
+          layout_weight="1";
+        };
+      };
+      {
+        TextView;
+        id="code";
+        layout_width="-1";
+        layout_height="-1";
+        textColor="#00000000";
+        onClick=function(v)pcall(load(v.Text))end;
+      };
+    };
+  };
+
+  {
+    LinearLayout;
+    layout_width="-1";
+    layout_height="-2";
+    orientation="vertical";
+    onClick=function()end;
+    {
+      CardView;
+      CardElevation="0dp";
+      CardBackgroundColor=cardbackc;
+      Radius="8dp";
+      layout_width="-1";
+      layout_height="-2";
+      layout_margin="16dp";
+      layout_marginTop="8dp";
+      layout_marginBottom="8dp";
+      {
+        TextView;
+        id="title";
+        textColor=textc;
+        textSize="16sp";
+        gravity="center|left";
+        Typeface=字体("product");
+        layout_width="-1";
+        layout_height="-1";
+        padding="16dp";
+      };
+      {
+        TextView;
+        id="code";
+        layout_width="-1";
+        layout_height="-1";
+        textColor="#00000000";
+        onClick=function(v)pcall(load(v.Text))end;
+      };
+    };
+  };
+
+  {
+    LinearLayout;
+    layout_width="-1";
+    layout_height="-2";
+    orientation="vertical";
+    paddingLeft="8dp";
+    paddingRight="8dp";
+    onClick=function()end;
+    {
+      NoScrollGridView;
+      id="favorite";
+      layout_height="-2";
+      layout_width="-1";
+      --DividerHeight=0;
+      NumColumns=2;
+      --layout_marginTop="8dp";
+    };
+  };
+
+}
+
+homeadp=LuaMultiAdapter(activity,homeitem)
+homelist.setAdapter(homeadp)--侧滑
+
+getHuos()
+homelist.setLayoutAnimation(controller)
 
 function onResume()
-  if(Networks.isVpnUsed())then
-    print("抓包贵物给👴爬")
-    activity.finish()
-  end
+if(Networks.isVpnUsed())then
+print("抓包贵物给👴爬")
+activity.finish()
+end
 end
 
 
